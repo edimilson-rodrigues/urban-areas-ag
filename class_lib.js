@@ -2,49 +2,83 @@
 ======================================
 ### Classification Library  ###
 Origin Collection: 5
-Revision: 7
-# Notes
-- Remember to Change asset path in ExportImage function (assetID)
+Revision: 9
 =======================================
 */
-//Prepare the training samples
+
+//Training sample preparation
 var getFeatureSpace = function(image, samples){
- 
+
   samples = image.sampleRegions({
     collection:samples,
     scale:30,
     geometries:true,
     tileScale:16
     });
+
   return ee.FeatureCollection(samples);
+
 };
-//Classifier
-var runRandomForest = function(ntree, image, samples){
-  //Train the classifier
-  var classifier = ee.Classifier.smileRandomForest({
-                    numberOfTrees:ntree,
-                    minLeafPopulation:20,
-                    seed: 24
-                    })
-                    .train({
-                      'features':samples,
-                      'classProperty':'value',
-                      'inputProperties':image.bandNames()
-                    })
-                    .setOutputMode('PROBABILITY');
-  //Classify the mosaic
-  var classified = image.classify(classifier);
-  
-  return classified;
-  
-};
-//Runs the classification
-var classifyLandsat = function(image, samples){
-  var classified = runRandomForest(500, image, samples);
-  return classified.multiply(100).byte();
-  
-}; 
+
+
+
+  var classifyLandsat = function(bands, samples, ntree, image_class){
+
+    var classifier = ee.Classifier.smileRandomForest({
+      numberOfTrees:ntree,
+      minLeafPopulation:20,
+      seed:24})
+      .train({
+        'features':samples,
+        'classProperty':'value',
+        'inputProperties':bands
+      })
+      .setOutputMode('PROBABILITY')
+    ;
+
+    print("explain classifier", classifier.explain());
+
+    var classified = image_class.classify(classifier);
+    return classified.multiply(100).byte();
+
+  }; 
+
+
+
+  var CalcClassifier = function(bands, samples, ntree){
+
+    var classifier = ee.Classifier.smileRandomForest({
+      numberOfTrees:ntree,
+      minLeafPopulation:20,
+      seed:24})
+      .train({
+        'features':samples,
+        'classProperty':'value',
+        'inputProperties':bands
+      })
+      .setOutputMode('PROBABILITY')
+    ;
+
+    //print("explain classifier", classifier.explain());
+
+    return classifier;
+
+  }; 
+
+
+
+  var OnlyClassify = function(CLASSIFIER, image_class){
+
+    var classified = image_class.classify(CLASSIFIER);
+    return classified.multiply(100).byte();
+
+  }; 
+
+
+
 ////////////////////////////////////////////////////////////
+//exports.getFeatureSpace = getFeatureSpace;
+//exports.runRandomForest = runRandomForest;
 exports.classifyLandsat = classifyLandsat;
-exports.getFeatureSpace = getFeatureSpace;
-exports.runRandomForest = runRandomForest;
+exports.CalcClassifier = CalcClassifier;
+exports.OnlyClassify = OnlyClassify;
