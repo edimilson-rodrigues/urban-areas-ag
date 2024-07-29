@@ -2,8 +2,11 @@
 ======================================
 ### Temporal Filter I  ###
 Origin Collection: 6
+Revision: 9
+
 # Notes
 - Remember to Change asset path in ExportImage function (assetID)
+- Estimed Time: 30min/year
 =======================================
 */
 
@@ -16,13 +19,12 @@ var geometry =
           [-34.08374475239747, -35.664852805616775],
           [-34.08374475239747, 6.5025740143888955]]], null, false);
 
-var cartasIBGE = ee.FeatureCollection('projects/mapbiomas-workspace/AUXILIAR/cartas').filterBounds(hexag)
 
 //Defines the input asset and delimits the export area
-var sf_version = '4' 
-var ft1_version = '4'
-var input_asset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA8_2-FS/'//  spatial filter
-var outputAsset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA8_3-FT/'
+var sf_version = '2' 
+var ft1_version = '2'
+var input_asset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA9_2-FS/'//  spatial filter
+var outputAsset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA9_3-FT/'
 
 var n = 24
 var outputVersion = '-FT1' + '-' + ft1_version
@@ -33,17 +35,16 @@ var ExportImage = function(image, geometry, year){
         "image": image,
         "assetId": outputAsset + imageName,
         "description": imageName,
-        // "region": geometry,
-        "region": cartasIBGE.geometry().simplify(1)
+        "region": geometry,
         "scale": 30,
         "maxPixels": 1e13,
     });
   };
 
 //Defines the list of years considered and separates the initial and final years
-var years_mid = ee.List.sequence(1987, 2020).getInfo()
+var years_mid = ee.List.sequence(1987, 2021).getInfo()
 var first_years = [1985,1986]
-var last_years = [2021,2022]
+var last_years = [2022,2023]
 
 //It applies the filter for the first years considering itself and the following three years and exports the result
 var filter_FY = first_years.map(function(year){
