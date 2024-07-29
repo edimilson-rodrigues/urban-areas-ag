@@ -2,9 +2,11 @@
 ======================================
 ### Spatial Filter ###
 Origin Collection: 8
+Revision: 9
 
 # Notes
 - Remember to Change asset path in ExportImage function (assetID)
+- Estimed Time: 120 min/year
 =======================================
 */
 
@@ -20,27 +22,28 @@ var geometry =
 
 
 //Defines the input asset and delimits the export area
-var infraprob = ee.ImageCollection('projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA8_1-Prob')
+var infraprob = ee.ImageCollection('projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA9_1-Prob')
 var hexag = ee.FeatureCollection('projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA5/cartas_hex_col')
 var cartasIBGE = ee.FeatureCollection('projects/mapbiomas-workspace/AUXILIAR/cartas').filterBounds(hexag)
 
 //batch
-var batch = require('users/edimilsonrodriguessantos/mapbiomas:Col8/batch.js') 
+var batch = require('users/edimilsonrodriguessantos/mapbiomas:Col8/batch.js') //this code is named as batch_spatialFilter on gitHub
 var keys = batch.keysList()
 var values = batch.valuesList()
 var extraGrid = ee.Dictionary.fromLists(keys, values).getInfo()
 var extraVersion = '7'
 
 //Defines the list of years considered and separates the initial and final years
-var listYears = ee.List.sequence(1985, 2022).getInfo()
+var listYears = ee.List.sequence(1994, 2023).getInfo()
 
 //================================================================================================
 //>>>>>>>>>>LEMBRE-SE DE VERIFICAR AS VERSÕES DE ENTRADA, SAÍDA, LIMIARES E DESCRIÇÃO<<<<<<<<<<<
 //================================================================================================
-var prob_version = '7'
-var threshold_version = '3'
-var description = 'Spatial_Filter_rev4-1.js; prob v7; limiares de prob v3-col8; IRS2022-v5; LowNL- 67 municipios; inclusao de Santa Isabel do Rio Negro (AM)'
-var output_version = '4'
+var collection_id = '9'
+var prob_version = '1'
+var threshold_version = '2'
+var description = 'Spatial_Filter_rev5-1; prob v1-col9; limiares de prob v1-col9; IRS2023-v2; LowNL- 67 municipios'
+var output_version = '1'
 var NL_threshold = 1
 var lowNL_threshold = 0.5
 var irs_threshold = 500
@@ -58,14 +61,15 @@ var mun_lowNL = [
  '1303601', // Santa Isabel do Rio Negro (AM)
  '5107776', // Santa Terezinha (MT)
  '1502509', // Chaves (PA)
+
   ]
 
 // asset adress
-var assetThreshold = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA8/LIMIARES/Threshold_Grid-v' + threshold_version + '_'
-var output_asset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA8_2-FS/'
+var assetThreshold = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA9/LIMIARES/Threshold_Grid-v' + threshold_version + '_'
+var output_asset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA9_2-FS/'
 
 // add the IRS index to the spatial filter
-var irs = ee.ImageCollection('users/efjustiniano/IRS2022/IRS2022_v5_30').sum()
+var irs = ee.ImageCollection('users/efjustiniano/IRS2023/IRS2023_v2').sum()
 
 //Map.addLayer(irs, {}, 'IRS', false)
 
@@ -74,6 +78,7 @@ var nighttime_col = ee.ImageCollection('NOAA/VIIRS/DNB/MONTHLY_V1/VCMSLCFG')
 
 var getNighttimeLayer = function(){
   
+  var nighttime_2023 = nighttime_col.filterDate('2023-01-01', '2023-12-31').select(['avg_rad']).median();
   var nighttime_2022 = nighttime_col.filterDate('2022-01-01', '2022-12-31').select(['avg_rad']).median();
   var nighttime_2021 = nighttime_col.filterDate('2021-01-01', '2021-12-31').select(['avg_rad']).median();
   var nighttime_2020 = nighttime_col.filterDate('2020-01-01', '2020-12-31').select(['avg_rad']).median();
@@ -86,7 +91,7 @@ var getNighttimeLayer = function(){
   
   var nighttimes_max = ee.ImageCollection([nighttime_2014, nighttime_2015, nighttime_2016, nighttime_2017, 
                                            nighttime_2018, nighttime_2019, nighttime_2020, nighttime_2021,
-                                           nighttime_2022])
+                                           nighttime_2022,nighttime_2023])
                                           .max().rename('nighttime');
 
   return nighttimes_max
@@ -214,7 +219,7 @@ var bestProbImage = function (year){
                      .set('territory','BRAZIL')
                      .set('source','GT URBANO')
                      .set('theme','Urban Area')
-                     .set('collection_id','8')
+                     .set('collection_id',collection_id)
                      .set('input_version',prob_version)
                      
         var imageName =  String(year)+ '-' + output_version;
