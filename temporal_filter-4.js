@@ -17,17 +17,15 @@ var geometry =
           [-34.08374475239747, -35.664852805616775],
           [-34.08374475239747, 6.5025740143888955]]], null, false);
 
-var cartasIBGE = ee.FeatureCollection('projects/mapbiomas-workspace/AUXILIAR/cartas')
-
 /*
 Results: (0 and masked) = Non-urban, 1 = urban
 */
 
 //Defines the input asset and delimits the export area to the most of years
-var input_asset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA8_3-FT/'
+var input_asset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA9_3-FT/'
 var outputAsset = input_asset
 
-var versionNumber = '4'
+var versionNumber = '2'
 var version = '-FT3-' + versionNumber//versão de entrada
 var outputVersion = '-FT4-' + versionNumber//versão de saída
 var scale = 30
@@ -46,8 +44,7 @@ var ExportImage = function(image, imageName){
         "image": imageRenamed.toByte(),
         "assetId": outputAsset + imageName,
         "description": imageName,
-        // "region": geometry,
-        "region": cartasIBGE.geometry(),
+        "region": geometry,
         "scale": scale,
         "maxPixels": 1e13,
     });
@@ -74,7 +71,7 @@ var downloadToAsset = function (collection){
 }}
 
 //Apply a consolidation process considering the most of the years
-var years = ee.List.sequence(1986, 2022).getInfo()
+var years = ee.List.sequence(1986, 2023).getInfo()
 
 // - Obtain an image Collection of interest
 var validatedCollection = ee.ImageCollection(
