@@ -15,17 +15,14 @@ var geometry =
           [-34.08374475239747, -35.664852805616775],
           [-34.08374475239747, 6.5025740143888955]]], null, false);
 
-var cartasIBGE = ee.FeatureCollection('projects/mapbiomas-workspace/AUXILIAR/cartas')
 
 //Defines the input asset and delimits the export area
-var input_asset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA8_3-FT/'
+var input_asset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA9_3-FT/'
 var outputAsset = input_asset
 
-// Versão utilizada para o caso geral de municípios
-// var versionNumber = '3'
+// Versão utilizada 
+var versionNumber = '2'
 
-//versão utilizada para o caso de municipios faltantes
-var versionNumber = '4'
 
 var version = '-FT1-' + versionNumber
 var outputVersion = '-FT2-' + versionNumber
@@ -39,17 +36,16 @@ var ExportImage = function(image, geometry, year){
         "image": image,
         "assetId": outputAsset + imageName,
         "description": imageName,
-        // "region": geometry,
-        "region": cartasIBGE.geometry().simplify(1),
+        "region": geometry,
         "scale": 30,
         "maxPixels": 1e13,
     });
   };
 
 //Defines the list of years considered and separates the final years
-var years_mid = ee.List.sequence(1985, 2019).getInfo()
-var last_years = [2020, 2021]
-var last_year = [2022]
+var years_mid = ee.List.sequence(1985, 2020).getInfo()
+var last_years = [2021, 2022]
+var last_year = [2023]
 
 //Apply the filter for all years except the last three and export the results
 var filter_GR2 = years_mid.map(function(year){
