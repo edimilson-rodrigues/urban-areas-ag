@@ -1,31 +1,38 @@
-/*
-Código organizando os resultados de acurácia segundo os maiores valores de acurácia
+/* 
+======================================
+### Best threshold calculation ###
+Origin Collection: 8
+Revision: 9
+
+# Notes
+- Remember to Change asset path in ExportImage function (assetID)
+=======================================
 */
 
 // size of superfeature list
-var listToMap = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+var listToMap = [1,2,3,4,5,6,7,8,9,10,11]
 
 // assets and variables
 var municipios = ee.FeatureCollection('projects/ee-bmm-mapbiomas/assets/ibge/BR_Municipios_2021')
 var hexag = ee.FeatureCollection('projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA5/cartas_hex_col')
 var cartasBrasil = ee.FeatureCollection('projects/mapbiomas-workspace/AUXILIAR/cartas').filterBounds(hexag)
 
-// Collection 8
-var infraprob = ee.ImageCollection('projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA8_1-Prob')
-var probVersion = '5'
-var bestThresholdVersion = '4'
+// Collection 9
+var infraprob = ee.ImageCollection('projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA9_1-Prob')
+var probVersion = '1'
+var bestThresholdVersion = '1'
 var bandName = 'predicted'
 var scale = 30
 
 // list years
-var listYears = ee.List.sequence(1985, 2022).getInfo()
+var listYears = [2023]//ee.List.sequence(1985,1993).getInfo()
 
 // list to test the probability
 var listProb = ee.List.sequence(25, 75, 5).getInfo()//Probability layer
 
 //Samples asstes adress
-var nurb_asset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA8/SAMPLES/NUrb/Samples_NUrb_v5_'
-var urb_asset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA8/SAMPLES/Urb/Samples_Urb_v5_'
+var nurb_asset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA9/SAMPLES/NUrb/Samples_NUrb_Train_v5_'
+var urb_asset = 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA9/SAMPLES/Urb/Samples_Urb_Train_v5_'
 var selectProp = ['year','value']
 
 // get the image or probability
@@ -33,7 +40,7 @@ var getInfraProbImage = function(year){
     
       var prob = infraprob.filter(ee.Filter.eq('year',year))
                           .filter(ee.Filter.eq('version', probVersion))// essa linha n deve ser usada na col 7
-      //print('Prob_' + year, prob, prob.size())  
+      print('Prob_' + year, prob, prob.size())  
       
     return prob.mosaic().unmask().toByte()
     };
@@ -463,8 +470,10 @@ var grid_9= [
 'SF-23-V-A',
 'SF-23-V-B',
 'SF-23-V-C',
-'SF-23-V-D',
-'SF-23-X-A',
+'SF-23-V-D']
+
+var grid_11 = 
+['SF-23-X-A',
 'SF-23-X-B',
 'SF-23-X-C',
 'SF-23-X-D',
@@ -489,7 +498,7 @@ var grid_9= [
 'SG-22-V-C',
 ]
 
-var grid_10= [
+var grid_10 = [
 'SG-22-V-D',
 'SG-22-X-A',
 'SG-22-X-B',
@@ -648,7 +657,8 @@ var gridDict = {
   8: grid_8,
   9: grid_9,
   10: grid_10,
-  11: extraGrid
+  11: grid_11,
+  12: extraGrid
 }
 
 function gridList (i){
@@ -660,7 +670,7 @@ function bestProbBySuperFeature(i){
     
     // filtra por supergrid
     var cartas = gridList(i)
-    
+    print('grid: ' + i,cartas)
     // aplica a funcao de calculo de limiares
     listYears.forEach(function(year){
       
@@ -684,7 +694,7 @@ function bestProbBySuperFeature(i){
                                  .select(selectProp)
                                  .filterBounds(geometry)
                                 // .randomColumn().filter('random < 0.5')
-              
+              //print(nurbSamples.size(),urbSamples.size())
               var points = urbSamples.merge(nurbSamples)
               
               var accuracyCalc = listProb.map(function(n){
@@ -736,32 +746,20 @@ function bestProbBySuperFeature(i){
       var accuracyResults = ee.FeatureCollection(accuracyByProb)
                               //.flatten() ativar para análise de curva de acurácia
                               
-      // print(accuracyResults)
+       //print(accuracyResults)
       
       var name = 'Threshold_Grid-v'+ bestThresholdVersion + '_' + i + '_' + year
-      
-      // // Map.addLayer(accuracyResults)
-      // Export.table.toDrive({
-      //   collection: accuracyResults, 
-      //   description: 'teste_' + name, 
-      //   folder: 'exports_mapbiomas', 
-      //   fileNamePrefix: 'teste_' + name,
-      //   fileFormat: 'CSV'
-      // })
       
       Export.table.toAsset({
         collection:accuracyResults, 
         description: name, 
-        assetId: 'users/edimilsonrodriguessantos/mapbiomasCollections/col8/limiares/' + name
+        assetId: 'projects/ee-bmm-mapbiomas/assets/Landsat-Col-9/Thresholds/' + name
         // assetId: 'projects/mapbiomas-workspace/TRANSVERSAIS/INFRAURBANA8/LIMIARES/' + name
       })
       
     return accuracyResults
     })
   
-  // return ee.Feature(null)
-  //         .set('sp_grid', i)
-          // .set('sizeCartas', cartasFiltered.size())
   }
 
 listToMap.forEach(bestProbBySuperFeature)
