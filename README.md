@@ -7,7 +7,7 @@
     <h1 class="title toc-ignore">Urban Area</h1>
 </div>
 
-Developed by MapBiomas Urban Area Mapping Group, composed by students and researchers from:
+Developed by MapBiomas Urban Areas Mapping Group, composed by students and researchers from:
 - LabCart <br/>
 - LASERE <br/>
 - NEEPC <br/>
@@ -17,7 +17,7 @@ Developed by MapBiomas Urban Area Mapping Group, composed by students and resear
 - UFBA <br/>
 
 # About
-This documentation contains general information about the urban areas mapping procedures developed by MapBiomas project in Collection 8 products. Both the concepts that were applied and the main accuracy results are detailed in the Algorithm Theoretical Basis Document (ATBD) about urban areas (see https://mapbiomas.org/). Here we highlight the sequential procedures to classify urban areas from satellite imagery and reference base-maps.<br/>
+This documentation contains general information about the urban areas mapping procedures developed by MapBiomas project in Collection 9 products. Both the concepts that were applied and the main accuracy results are detailed in the Algorithm Theoretical Basis Document (ATBD) about urban areas (see https://mapbiomas.org/). Here we highlight the sequential procedures to classify urban areas from satellite imagery and reference base-maps.<br/>
 
 # How to use
 ## Basics
@@ -30,17 +30,20 @@ The modules necessary are shown in Tables 1 and 2.<br/>
 _Table 1 - Basic classification codes._
 |Codes| General description
 |:---|:---
-**preProcessing_lib.js** | Filters Landsat collection scenes and masks clouds and shadows.
-**index_lib.js** | Functions to generate a library of image indexes.
-**mosaic_production.js** | Generates mosaics from Landsat images from 1985 to 2022.
+**preProcessing_lib.js** | Code with functions to scale surface reflectance images and remove cloud and shadow clouds.
+**renameBands.js** | Code with list of bands used to create feature space.
+**index_lib.js** | Library with index calculation functions used during the mosaic production.
+**mosaic_production.js** | Generates mosaics from Landsat images from 1985 to 2023.
+**gridModels.js** | Alternative grids to perform Random Forest.
 **class_lib.js** | Sets up a classification procedure using Random Forest (RF) algorithm.
-**classification_batch.js** | Applies a classification process using Random Forest (RF) algorithm.
+**classification_batch.js** | Perform the classification using mosaics, samples, and the classifier.
 <br/>
 
 _Table 2 - Spatial and temporal classification codes._
 |Codes| General description
 |:---|:---|
 |**best_thresholds.js**| Calculates the best urban probability to be adopted by the RF results.
+|**batch_spatialFilter.js**| Code with a set of functions and information to support the spatial filter..
 |**spatial_filter.js**| Applies morphological operations to obtain the urban areas. Reference maps and the best probability thresholds are considered.
 |**temporal_filter-1.js**| Applies temporal rules over pixels classified as urban areas from spatial filter results.
 |**temporal_filter-2.js**| Applies temporal rules over pixels validated as urban areas from the first temporal filter.
@@ -49,13 +52,13 @@ _Table 2 - Spatial and temporal classification codes._
 <br/>
 
 ## Other information
-The urban areas are classified according to land use and land cover samples assumed as reference. They are composed of randomly distributed points across the Brazilian territory and each one contains a database that includes a library of variables, such as spectral indexes and Landsat bands values about the class to which they belong. More information about how they are generated and validated can be found in the ATBD. <br/>
+The urban areas are classified according to land use and land cover samples assumed as reference. They are composed of randomly distributed points across the Brazilian territory and each one contains a database that includes a library of variables, such as spectral indexes and Landsat bands values about the class to which they belong. More information about how they are generated and validated can be found in the ATBD. The samples used in the classification are used in the **[classification_batch.js](classification_batch.js)** code.<br/>
 
 The classification is based on polygons according to the International Millionth Map of the World over the interest territory. Also, hexagons where possible urban areas can be found were used to limit the territory to be classified. These areas combined were adopted as the processing unit and they are necessary to operate the classification within GEE memory limits. <br/>
 
 # Start the classification process
 ## Start processing the classification_batch.js script
-In this script, a classification process using Random Forest is carried out. All the codes in Table 1 are required. In it, the user must manually change the year variable to proceed with the classification. At the end of the basic classification process, an image by year (from 1985 to 2022) is formed and exported to the user asset into an image collection, which will be used in the next steps. The results by pixel (30 x 30 m) are presented in terms of probabilities to be urban. <br/>
+In this script, a classification process using Random Forest is carried out. All the codes in Table 1 are required. In it, the user must manually change the year variable to proceed with the classification. At the end of the basic classification process, an image by year (from 1985 to 2023) is formed and exported to the user asset into an image collection, which will be used in the next steps. The results by pixel (30 x 30 m) are presented in terms of probabilities to be urban. <br/>
 
 Code: **[classification_batch.js](classification_batch.js)**
 
@@ -86,19 +89,4 @@ _Table 3 - Temporal filters._
 |**[temporal_filter-3.js](temporal_filter-3.js)**| This filter (TF3) considers results from TF2. <br/> 
 |**[temporal_filter-4.js](temporal_filter-4.js)**| This filter (TF4) considers results from TF3. <br/>
 
-# Visualization codes
-You can put the map on the screen through a simple function exemplified below. You have to define a list of years and also the assets where you saved the results.<br/>
-
-```javascript
-var FT_result = "write here the asset address of the image Collection considered"
-var years = ["write here the list of years separated by commas"]
-
-var FTn_results = function(year){
-  var grN_V = “-FT1-1” 	//Here, write the name of the filter you would like to put in GEE screen
-  var img = ee.Image(FT_result + year + grN_V)
-  Map.addLayer(img, {bands: "remapped", min: 0, max: 1, palette: [“black”, “red”], opacity: 0.40}, grN_V + “-” +year) //Here you can specify visualizations parameters.
- return
-
-var img = years.map(FTn_results) //Add the map on the screen
-```
-You can put different results compared and also generate side-by-side results directly on GEE. For this, we encourage the public to consult Google Earth Engine documentation about _linked maps._
+The final results from the last temporal filter acts by consolidanting urban areas in the context of the MapBiomas project. Any external comparison must consider the concepts expressed in the Urban Areas - Algorithm Theoretical Basis Document (ATBD), available in the **https://brasil.mapbiomas.org/**.
