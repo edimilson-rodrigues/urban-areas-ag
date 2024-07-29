@@ -66,7 +66,7 @@ Code: **[classification_batch.js](classification_batch.js)**
 Since the image classified is expressed in terms of the probability to be urban, it is possible to select a value from which the classification is assumed as urban. This is processed by estimating the best probability to each polygon as defined previously considering probabilities from 25% to 75% (i. e. above 75% the map is assumed as urban). This product will be submitted to the spatial filter, when other reference maps will operate as boolean layers defining patches where urban areas can be found.<br/>
 
 Code: **[best_thresholds.js](best_thresholds.js)**
-## Start spatial filters
+## Start spatial filter
 Spatial filters combine the information to improve the classification process considering the urban probability (from Random Forest classification and best thresholds);  the Index of Roads and Infrastructure (https://doi.org/10.1016/j.jag.2022.102791); monthly average radiance composite images using nighttime data from the Visible Infrared Imaging Radiometer Suite (VIIRS) Day/Night Band (DNB); Brazilian census tract (IBGE, 2020), and subnormal settlements (IBGE, 2010 and 2019).<br/>
 
 Code: **[spatial_filter.js](spatial_filter.js)**
