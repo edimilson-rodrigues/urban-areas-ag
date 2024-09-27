@@ -1,7 +1,7 @@
 <div class="fluid-row" id="header">
     <div id="column">
         <div class = "blocks">
-            <img src='Image/logo_mapbiomas_argentina.svg' height='10' width='auto' align='center'>
+            <img src='Image/logo_mapbiomas_argentina.svg' height='auto' width='auto' align='center'>
         </div>
     </div>
     <h1 class="title toc-ignore">Urban Area</h1>
